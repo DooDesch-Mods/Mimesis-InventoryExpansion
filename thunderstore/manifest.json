@@ -1,7 +1,7 @@
 {
   "name": "InventoryExpansion",
   "version_number": "0.0.0",
-  "website_url": "https://github.com/DooDesch/Mimesis-InventoryExpansion",
+  "website_url": "https://github.com/DooDesch-Mods/Mimesis-InventoryExpansion",
   "description": "Expand your inventory with additional backpack slots. Toggle between standard inventory and backpack with a configurable key. Features animated UI, visual key hints, and automatic cleanup when leaving the game.",
   "dependencies": [
     "LavaGang-MelonLoader-0.7.3"
@@ -10,4 +10,3 @@
     "DooDesch"
   ]
 }
-

@@ -6,7 +6,7 @@
 > Adds extra backpack inventory slots you toggle on demand with a configurable key, shown in a custom animated panel that slides in and out.
 > Carry more loot without permanently cluttering the standard 4-slot hotbar. Standalone, no MimicAPI required.
 
-![Version](https://img.shields.io/badge/version-1.4.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.6-blue)
 ![Game](https://img.shields.io/badge/game-MIMESIS-purple)
 ![MelonLoader](https://img.shields.io/badge/MelonLoader-0.7.3+-green)
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
@@ -15,12 +15,13 @@
 
 - Adds 4, 9, or 16 extra inventory slots laid out as a square grid (2x2, 3x3, or 4x4); the count is configurable. The new slots are real, usable inventory, not just a visual overlay.
 - Toggle between the standard hotbar and the backpack with a configurable key (default `C`); the mod reads the key live each frame.
-- Extra slots render in a custom backpack UI panel that uses the shipped `Backpack.png` sprite and slides in and out with a short eased animation. If the image is missing it falls back to a translucent black panel.
+- Extra slots render in a custom backpack UI panel that uses the embedded `Backpack.png` sprite and slides in and out with a short eased animation. If the image cannot load it falls back to a translucent black panel.
 - Shows a visual key hint on the panel displaying the currently configured toggle key.
 - Context-aware slot scrolling: while the backpack is open, slot cycling affects only the backpack slots; while it is closed, it affects only the standard 4 slots.
 - Cursor handoff on toggle: opening the backpack moves your selection to the first backpack slot, and closing it returns the selection to the standard inventory, so the cursor never stays stuck on a hidden slot. Each direction is configurable.
 - Optional backpack-first pickup: while the backpack is open, items you pick up fill the backpack slots before the standard inventory (host / single-player only).
 - Optional movement-speed reduction to 50% while the backpack is fully open, restored automatically when it closes.
+- Blocks large items from entering the open backpack and prevents opening it while holding one; configurable through `BlockLargeItemsInBackpack`.
 - Automatically hides the panel during loading screens and map changes, and when you leave the game or return to the title screen.
 
 ## Screenshots
@@ -59,7 +60,7 @@
 
 | Component | Version |
 |-----------|---------|
-| MIMESIS | 0.3.0 (current Steam build) |
+| MIMESIS | 0.3.2 |
 | MelonLoader | 0.7.3+ |
 
 ## Installation
@@ -71,10 +72,11 @@ Install through a Thunderstore mod manager such as [r2modman](https://thundersto
 ### Manual
 
 1. Install [MelonLoader 0.7.3](https://melonwiki.xyz/#/) into MIMESIS.
-2. Download the latest release from the [releases page](../../releases).
+2. Download the latest release from the [releases page](https://github.com/DooDesch-Mods/Mimesis-InventoryExpansion/releases).
 3. Place `InventoryExpansion.dll` into `MIMESIS/Mods/`.
-4. Place the bundled `Backpack.png` at `MIMESIS/Mods/Assets/Backpack.png` (an `Assets` subfolder next to the DLL). Without it the panel still works but renders as a plain translucent box.
-5. Launch the game once to generate the configuration file at `UserData/MelonPreferences.cfg`.
+4. Launch the game once to generate the configuration file at `UserData/MelonPreferences.cfg`.
+
+The backpack image is embedded in the DLL. To use your own image, place it at `MIMESIS/Mods/Assets/Backpack.png`.
 
 ## Configuration
 
@@ -89,6 +91,7 @@ Stored in `UserData/MelonPreferences.cfg` under the `[InventoryExpansion]` categ
 | `SelectBackpackSlotOnOpen` | When opening the backpack, move the selected slot to the first backpack slot. | `true` | `true` / `false` |
 | `RestoreStandardSlotOnClose` | When closing the backpack, return the selected slot to the standard inventory (the slot selected before opening). | `true` | `true` / `false` |
 | `FillBackpackFirst` | While the backpack is open, picked-up items fill the backpack slots before the standard inventory. Host / single-player only. | `true` | `true` / `false` |
+| `BlockLargeItemsInBackpack` | Block large items from entering the open backpack and prevent opening it while holding one. | `true` | `true` / `false` |
 
 ## Usage
 
@@ -102,7 +105,7 @@ Stored in `UserData/MelonPreferences.cfg` under the `[InventoryExpansion]` categ
 
 ## Compatibility
 
-Built for Mimesis 0.3.0 / MelonLoader 0.7.3. This is a client-side, single-player UI mod with no host or multiplayer requirement.
+Built for Mimesis 0.3.2 / MelonLoader 0.7.3. In multiplayer, install it on the host and clients using the extra slots, with matching `AdditionalSlots` settings. The host controls the slot count; the clients provide the backpack UI. Backpack-first pickup applies to the host's own inventory.
 
 ## Building (developers)
 
@@ -110,12 +113,12 @@ Built for Mimesis 0.3.0 / MelonLoader 0.7.3. This is a client-side, single-playe
 dotnet build -c Release
 ```
 
-References are resolved from `Workspace/lib/game` (game DLLs) and `Workspace/lib/melonloader`. The PostBuild step copies `InventoryExpansion.dll` to the configured `Mods` directory and copies `Assets/Backpack.png` to `Mods/Assets/Backpack.png`.
+References are resolved from `Workspace/lib/game` (game DLLs) and `Workspace/lib/melonloader`. The shared deploy configuration defaults to `_Test/MIMESIS/Mods`. The backpack image is embedded in `InventoryExpansion.dll`.
 
 ## Credits / License
 
-Author: DooDesch. Provided as-is under the MIT License. Contributions welcome via pull requests on the [repository](https://github.com/DooDesch/Mimesis-InventoryExpansion).
+Author: DooDesch. Provided as-is under the MIT License. Contributions welcome via pull requests on the [repository](https://github.com/DooDesch-Mods/Mimesis-InventoryExpansion).
 
 ## AI disclosure
 
-The mod icon is AI-generated. Code and configuration are hand-written.
+The mod icon is AI-generated.

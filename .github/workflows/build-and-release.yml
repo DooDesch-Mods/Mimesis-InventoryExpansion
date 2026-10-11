@@ -129,23 +129,15 @@ jobs:
       - name: Create release ZIP
         run: zip -j "InventoryExpansion_${{ steps.version-check.outputs.version }}.zip" release/*
 
-      - name: Bundle for Nexus
+      - name: Prepare Nexus bundle
         run: |
-          # Getrenntes Archiv, weil die Zielgruppen verschieden sind: Thunderstore braucht
-          # manifest.json und icon.png, ein Nexus-Nutzer entpackt von Hand nach Mods/ und soll
-          # dort keine Paketmetadaten liegen haben.
-          mkdir -p nexus
-          cp bin/Release/netstandard2.1/InventoryExpansion.dll nexus/
-          if [ -d "Assets" ]; then
-            mkdir -p nexus/Assets
-            cp Assets/*.png nexus/Assets/ 2>/dev/null || true
-          fi
-          if [ -f "thunderstore/README.md" ]; then
-            cp thunderstore/README.md nexus/ || true
-          fi
-          zip -r "InventoryExpansion_${{ steps.version-check.outputs.version }}_nexus.zip" nexus/* 
-          echo "Nexus bundle contents:"
-          unzip -l "InventoryExpansion_${{ steps.version-check.outputs.version }}_nexus.zip"
+          mkdir -p nexus/Mods
+          cp bin/Release/netstandard2.1/InventoryExpansion.dll nexus/Mods/
+          cp README.md LICENSE.md CHANGELOG.md nexus/
+          mkdir -p nexus/Mods/Assets
+          cp Assets/Backpack.png nexus/Mods/Assets/
+          (cd nexus && zip -r "../InventoryExpansion_${{ steps.version-check.outputs.version }}_nexus.zip" .)
+          unzip -t "InventoryExpansion_${{ steps.version-check.outputs.version }}_nexus.zip"
 
       - name: Upload Nexus ZIP
         uses: actions/upload-artifact@v4
@@ -176,11 +168,18 @@ jobs:
           unzip -q "InventoryExpansion_${{ needs.build.outputs.version }}.zip" -d release/
           ls -la release/
 
+      - name: Download Nexus bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: InventoryExpansion-nexus
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
-          files: release/InventoryExpansion.dll
+          files: |
+            release/InventoryExpansion.dll
+            InventoryExpansion_${{ needs.build.outputs.version }}_nexus.zip
           body: |
             ## Changes in ${{ needs.build.outputs.version }}
 
