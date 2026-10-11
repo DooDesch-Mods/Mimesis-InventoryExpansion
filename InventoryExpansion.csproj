@@ -4,6 +4,8 @@
 	     Workspace is a sibling of this folder, in CI it is checked out INTO this repo. -->
 	<Import Project="$(MSBuildThisFileDirectory)../Workspace/build/GameRefs.props" Condition="Exists('$(MSBuildThisFileDirectory)../Workspace/build/GameRefs.props')" />
 	<Import Project="$(MSBuildThisFileDirectory)Workspace/build/GameRefs.props" Condition="Exists('$(MSBuildThisFileDirectory)Workspace/build/GameRefs.props')" />
+	<Import Project="$(MSBuildThisFileDirectory)../Workspace/build/HostSettings.props" Condition="Exists('$(MSBuildThisFileDirectory)../Workspace/build/HostSettings.props')" />
+	<Import Project="$(MSBuildThisFileDirectory)Workspace/build/HostSettings.props" Condition="Exists('$(MSBuildThisFileDirectory)Workspace/build/HostSettings.props')" />
 	<Import Project="$(MSBuildThisFileDirectory)../Workspace/build/Deploy.props" Condition="Exists('$(MSBuildThisFileDirectory)../Workspace/build/Deploy.props')" />
 	<Import Project="$(MSBuildThisFileDirectory)Workspace/build/Deploy.props" Condition="Exists('$(MSBuildThisFileDirectory)Workspace/build/Deploy.props')" />
 	<Import Project="$(MSBuildThisFileDirectory)../Workspace/build/Hardening.props" Condition="Exists('$(MSBuildThisFileDirectory)../Workspace/build/Hardening.props')" />

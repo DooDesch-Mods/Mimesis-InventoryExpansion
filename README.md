@@ -6,7 +6,7 @@
 > Adds extra backpack inventory slots you toggle on demand with a configurable key, shown in a custom animated panel that slides in and out.
 > Carry more loot without permanently cluttering the standard 4-slot hotbar. Standalone, no MimicAPI required.
 
-![Version](https://img.shields.io/badge/version-1.4.6-blue)
+![Version](https://img.shields.io/badge/version-1.4.7-blue)
 ![Game](https://img.shields.io/badge/game-MIMESIS-purple)
 ![MelonLoader](https://img.shields.io/badge/MelonLoader-0.7.3+-green)
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
@@ -82,10 +82,12 @@ The backpack image is embedded in the DLL. To use your own image, place it at `M
 
 Stored in `UserData/MelonPreferences.cfg` under the `[InventoryExpansion]` category. You can also edit these through a MelonPreferences UI.
 
+The host controls `Enabled`, `AdditionalSlots`, `ReduceMovementSpeed`, `FillBackpackFirst`, and `BlockLargeItemsInBackpack` for the lobby. Joining clients use those values automatically without changing their local config. `BackpackKey`, `SelectBackpackSlotOnOpen`, and `RestoreStandardSlotOnClose` stay local. A host without InventoryExpansion uses the standard 4-slot inventory and no backpack. Shared-setting changes apply to the next lobby.
+
 | Option | Description | Default | Values/Range |
 |--------|-------------|---------|--------------|
 | `Enabled` | Enable InventoryExpansion functionality. When disabled, the mod will not modify game behavior. | `true` | `true` / `false` |
-| `AdditionalSlots` | Number of extra inventory slots to add on top of the game's default inventory size. Valid values: 4, 9, or 16 (square grids 2x2, 3x3, 4x4). Other values are rounded to the nearest valid option. | `4` | `4`, `9`, or `16` (clamped at read time: `<=6` becomes `4`, `<=12` becomes `9`, otherwise `16`; the corrected value is written back to the config) |
+| `AdditionalSlots` | Number of extra inventory slots to add on top of the game's default inventory size. Valid values: 4, 9, or 16 (square grids 2x2, 3x3, 4x4). Other values are rounded to the nearest valid option. | `4` | `4`, `9`, or `16` (clamped on load: `<=6` becomes `4`, `<=12` becomes `9`, otherwise `16`) |
 | `BackpackKey` | Key to toggle backpack visibility. Press to switch between standard inventory and backpack. | `C` | Any `UnityEngine.KeyCode` name (parsed case-insensitively). Invalid or empty values fall back to `C`. The key must also be a valid Unity Input System key name for the toggle to fire. |
 | `ReduceMovementSpeed` | When enabled, player movement speed is reduced to 50% while the backpack is fully open. | `true` | `true` / `false` |
 | `SelectBackpackSlotOnOpen` | When opening the backpack, move the selected slot to the first backpack slot. | `true` | `true` / `false` |
@@ -105,7 +107,7 @@ Stored in `UserData/MelonPreferences.cfg` under the `[InventoryExpansion]` categ
 
 ## Compatibility
 
-Built for Mimesis 0.3.2 / MelonLoader 0.7.3. In multiplayer, install it on the host and clients using the extra slots, with matching `AdditionalSlots` settings. The host controls the slot count; the clients provide the backpack UI. Backpack-first pickup applies to the host's own inventory.
+Built for Mimesis 0.3.2 / MelonLoader 0.7.3. In multiplayer, install it on the host and clients using the extra slots. Clients automatically use the host's slot count and gameplay settings; they provide the backpack UI. Backpack-first pickup applies to the host's own inventory.
 
 ## Building (developers)
 

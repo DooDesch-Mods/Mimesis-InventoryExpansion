@@ -1,4 +1,5 @@
 using System;
+using DooDesch;
 using MelonLoader;
 using UnityEngine;
 
@@ -17,6 +18,12 @@ namespace InventoryExpansion.Config
 		private static MelonPreferences_Entry<bool> _restoreStandardSlotOnClose;
 		private static MelonPreferences_Entry<bool> _fillBackpackFirst;
 		private static MelonPreferences_Entry<bool> _blockLargeItemsInBackpack;
+		private static HostSetting<bool> _effectiveEnabled;
+		private static HostSetting<int> _effectiveAdditionalSlots;
+		private static HostSetting<bool> _effectiveReduceMovementSpeed;
+		private static HostSetting<bool> _effectiveFillBackpackFirst;
+		private static HostSetting<bool> _effectiveBlockLargeItemsInBackpack;
+		internal static event Action EffectiveValuesChanged;
 #if DEBUG
 		private static MelonPreferences_Entry<bool> _debugDisableOwnerGate;
 #endif
@@ -80,6 +87,14 @@ namespace InventoryExpansion.Config
 				"Debug only: when true, the backpack-first redirect ignores who owns the inventory (the old, buggy behaviour), so the multiplayer item duplication can be reproduced for diagnosis. Keep this false for normal play."
 			);
 #endif
+			_additionalSlots.Value = ClampToValidBackpackSize(_additionalSlots.Value);
+			var hostSettings = new HostSettings(CategoryId);
+			_effectiveEnabled = hostSettings.Register(_enabled, false);
+			_effectiveAdditionalSlots = hostSettings.Register(_additionalSlots, 0, value => value == 0 || value == 4 || value == 9 || value == 16);
+			_effectiveReduceMovementSpeed = hostSettings.Register(_reduceMovementSpeed, false);
+			_effectiveFillBackpackFirst = hostSettings.Register(_fillBackpackFirst, false);
+			_effectiveBlockLargeItemsInBackpack = hostSettings.Register(_blockLargeItemsInBackpack, false);
+			hostSettings.EffectiveValuesChanged += () => EffectiveValuesChanged?.Invoke();
 		}
 
 		private static MelonPreferences_Entry<T> CreateEntry<T>(string identifier, T defaultValue, string displayName, string description = null)
@@ -92,7 +107,7 @@ namespace InventoryExpansion.Config
 			return _category.CreateEntry(identifier, defaultValue, displayName, description);
 		}
 
-		internal static bool Enabled => _enabled.Value;
+		internal static bool Enabled => _effectiveEnabled?.Value ?? _enabled?.Value ?? true;
 
 		private static int ClampToValidBackpackSize(int value)
 		{
@@ -114,26 +129,7 @@ namespace InventoryExpansion.Config
 			return 16;
 		}
 
-		internal static int AdditionalSlots
-		{
-			get
-			{
-				if (_additionalSlots == null)
-				{
-					return 4;
-				}
-
-				int value = _additionalSlots.Value;
-				int clampedValue = ClampToValidBackpackSize(value);
-
-				if (clampedValue != value)
-				{
-					_additionalSlots.Value = clampedValue;
-				}
-
-				return clampedValue;
-			}
-		}
+		internal static int AdditionalSlots => _effectiveAdditionalSlots?.Value ?? ClampToValidBackpackSize(_additionalSlots?.Value ?? 4);
 
 		internal static KeyCode BackpackKey
 		{
@@ -159,18 +155,17 @@ namespace InventoryExpansion.Config
 			}
 		}
 
-		internal static bool ReduceMovementSpeed => _reduceMovementSpeed?.Value ?? true;
+		internal static bool ReduceMovementSpeed => _effectiveReduceMovementSpeed?.Value ?? _reduceMovementSpeed?.Value ?? true;
 
 		internal static bool SelectBackpackSlotOnOpen => _selectBackpackSlotOnOpen?.Value ?? true;
 
 		internal static bool RestoreStandardSlotOnClose => _restoreStandardSlotOnClose?.Value ?? true;
 
-		internal static bool FillBackpackFirst => _fillBackpackFirst?.Value ?? true;
+		internal static bool FillBackpackFirst => _effectiveFillBackpackFirst?.Value ?? _fillBackpackFirst?.Value ?? true;
 
-		internal static bool BlockLargeItemsInBackpack => _blockLargeItemsInBackpack?.Value ?? true;
+		internal static bool BlockLargeItemsInBackpack => _effectiveBlockLargeItemsInBackpack?.Value ?? _blockLargeItemsInBackpack?.Value ?? true;
 #if DEBUG
 		internal static bool DebugDisableOwnerGate => _debugDisableOwnerGate?.Value ?? false;
 #endif
 	}
 }
-

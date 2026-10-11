@@ -434,8 +434,20 @@ namespace InventoryExpansion.Patches
 
 		internal static bool IsBackpackFullyVisible => _backpackFullyVisible;
 
+		internal static void ResetForSettingsChange()
+		{
+			HideBackpackCompletely();
+			_savedStandardSlot = 0;
+		}
+
 		internal static void HideBackpackCompletely()
 		{
+			if (_animationCoroutine != null)
+			{
+				MelonCoroutines.Stop(_animationCoroutine);
+				_animationCoroutine = null;
+			}
+			_backpackFullyVisible = false;
 			if (_backpackPanel != null && _backpackPanel.gameObject != null)
 			{
 				_backpackPanel.gameObject.SetActive(false);
@@ -761,7 +773,7 @@ namespace InventoryExpansion.Patches
 
 			try
 			{
-				if (_backpackPanel == null || _slotsMoved)
+				if (!InventoryExpansionPreferences.Enabled || _backpackPanel == null || _slotsMoved)
 				{
 					yield break;
 				}
@@ -1108,6 +1120,24 @@ namespace InventoryExpansion.Patches
 		private static long _originalMoveSpeedWalk = 0L;
 		private static long _originalMoveSpeedRun = 0L;
 		private static bool _speedReduced = false;
+		private static ProtoActor _speedReducedActor;
+
+		internal static void ResetLocalState()
+		{
+			try
+			{
+				RestoreMoveSpeed(_speedReducedActor);
+			}
+			catch (Exception ex)
+			{
+				MelonLogger.Error($"[InventoryExpansion][Movement] Failed to restore local movement speed on settings change: {ex}");
+			}
+		}
+
+		internal static void RestoreForActor(ProtoActor actor)
+		{
+			if (ReferenceEquals(actor, _speedReducedActor)) ResetLocalState();
+		}
 
 		[HarmonyPostfix]
 		[HarmonyPatch("Update")]
@@ -1115,15 +1145,21 @@ namespace InventoryExpansion.Patches
 		{
 			try
 			{
+				if (!__instance.AmIAvatar())
+				{
+					return;
+				}
+
 				if (!InventoryExpansionPreferences.Enabled)
 				{
 					RestoreMoveSpeed(__instance);
 					return;
 				}
 
-				if (!__instance.AmIAvatar())
+				if (_speedReduced && !ReferenceEquals(_speedReducedActor, __instance))
 				{
-					return;
+					ResetLocalState();
+					if (_speedReduced) return;
 				}
 
 				if (!_fieldInitialized)
@@ -1159,6 +1195,7 @@ namespace InventoryExpansion.Patches
 						_originalMoveSpeedWalk = (long)(moveSpeedWalkField.GetValue(netSyncActorData) ?? 350L);
 						_originalMoveSpeedRun = (long)(moveSpeedRunField.GetValue(netSyncActorData) ?? 700L);
 						_speedReduced = true;
+						_speedReducedActor = __instance;
 					}
 
 					moveSpeedWalkField.SetValue(netSyncActorData, (long)(_originalMoveSpeedWalk * 0.5f));
@@ -1177,7 +1214,7 @@ namespace InventoryExpansion.Patches
 
 		private static void RestoreMoveSpeed(ProtoActor instance)
 		{
-			if (!_speedReduced || _netSyncActorDataField == null)
+			if (!_speedReduced || _netSyncActorDataField == null || !ReferenceEquals(instance, _speedReducedActor))
 			{
 				return;
 			}
@@ -1199,11 +1236,14 @@ namespace InventoryExpansion.Patches
 
 		private static void RestoreMoveSpeed(object netSyncActorData, FieldInfo moveSpeedWalkField, FieldInfo moveSpeedRunField)
 		{
-			if (_speedReduced && _originalMoveSpeedWalk > 0L && _originalMoveSpeedRun > 0L)
+			if (_speedReduced)
 			{
 				moveSpeedWalkField.SetValue(netSyncActorData, _originalMoveSpeedWalk);
 				moveSpeedRunField.SetValue(netSyncActorData, _originalMoveSpeedRun);
 				_speedReduced = false;
+				_speedReducedActor = null;
+				_originalMoveSpeedWalk = 0L;
+				_originalMoveSpeedRun = 0L;
 			}
 		}
 	}
@@ -1216,10 +1256,7 @@ namespace InventoryExpansion.Patches
 		{
 			try
 			{
-				if (!InventoryExpansionPreferences.Enabled)
-				{
-					return;
-				}
+				BackpackMovementSpeedPatch.RestoreForActor(__instance);
 
 				if (__instance.AmIAvatar())
 				{
@@ -1249,11 +1286,6 @@ namespace InventoryExpansion.Patches
 		{
 			try
 			{
-				if (!InventoryExpansionPreferences.Enabled)
-				{
-					return;
-				}
-
 				if (!IsInGame())
 				{
 					HideBackpack();
@@ -1285,14 +1317,8 @@ namespace InventoryExpansion.Patches
 
 		internal static void HideBackpack()
 		{
-			if (BackpackPanelPatch.IsBackpackFullyVisible)
-			{
-				BackpackPanelPatch.ToggleBackpack();
-			}
-			else
-			{
-				BackpackPanelPatch.HideBackpackCompletely();
-			}
+			BackpackPanelPatch.HideBackpackCompletely();
+			BackpackMovementSpeedPatch.ResetLocalState();
 		}
 	}
 }

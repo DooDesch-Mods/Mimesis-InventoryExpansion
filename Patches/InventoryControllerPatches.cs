@@ -11,8 +11,8 @@ namespace InventoryExpansion.Patches
 	internal static class InventoryControllerPatches
 	{
 		[HarmonyPostfix]
-		[HarmonyPatch("Initialize")]
-		private static void Initialize_Postfix(InventoryController __instance)
+		[HarmonyPatch("Reset")]
+		private static void Reset_Postfix(InventoryController __instance)
 		{
 			try
 			{
@@ -62,19 +62,21 @@ namespace InventoryExpansion.Patches
 					return;
 				}
 
-				for (int i = 5; i <= maxSlots; i++)
-				{
-					if (!dict.Contains(i))
-					{
-						dict[i] = null;
-					}
-				}
+				EnsureSlotCapacity(dict, maxSlots);
 
 				MelonLogger.Msg($"InventoryExpansion: InventoryController extended to {maxSlots} slots.");
 			}
 			catch (Exception ex)
 			{
 				MelonLogger.Error($"InventoryExpansion: failed to extend InventoryController slots: {ex}");
+			}
+		}
+
+		internal static void EnsureSlotCapacity(IDictionary slots, int capacity)
+		{
+			for (int i = 5; i <= capacity; i++)
+			{
+				if (!slots.Contains(i)) slots[i] = null;
 			}
 		}
 

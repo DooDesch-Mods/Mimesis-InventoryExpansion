@@ -11,11 +11,21 @@ namespace InventoryExpansion
 		public override void OnInitializeMelon()
 		{
 			InventoryExpansionPreferences.Initialize();
+			InventoryExpansionPreferences.EffectiveValuesChanged += ApplyEffectiveSettings;
+			ApplyEffectiveSettings();
 			// MelonLoader auto-applies this assembly's Harmony patches via HarmonyInit(); calling PatchAll()
 			// here too would double-apply every patch (each prefix/postfix runs twice). Do NOT add it back.
 			// (See FakePlayers/Core.cs.)
 			MelonLogger.Msg("InventoryExpansion initialized. Enabled={0}", InventoryExpansionPreferences.Enabled);
 		}
+
+		private static void ApplyEffectiveSettings()
+		{
+			Patches.BackpackPanelPatch.ResetForSettingsChange();
+			Patches.BackpackMovementSpeedPatch.ResetLocalState();
+			Patches.GameConfigPatches.ApplyEffectiveSettings();
+		}
+
+		public override void OnUpdate() => DooDesch.HostSettings.Update();
 	}
 }
-
