@@ -4,6 +4,10 @@ All notable changes to InventoryExpansion are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.4.6] - 2026-10-11
+
+- Built against MIMESIS 0.3.2. Backpack settings are unchanged.
+
 ## [1.4.5] - 2026-09-04
 
 ### Changed
