@@ -6,7 +6,7 @@
 > Adds extra backpack inventory slots you toggle on demand with a configurable key, shown in a custom animated panel that slides in and out.
 > Carry more loot without permanently cluttering the standard 4-slot hotbar. Standalone, no MimicAPI required.
 
-![Version](https://img.shields.io/badge/version-1.4.6-blue)
+![Version](https://img.shields.io/badge/version-1.4.7-blue)
 ![Game](https://img.shields.io/badge/game-MIMESIS-purple)
 ![MelonLoader](https://img.shields.io/badge/MelonLoader-0.7.3+-green)
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
@@ -69,6 +69,8 @@ The backpack image is embedded in the DLL. To use your own image, place it at `M
 
 Stored in `UserData/MelonPreferences.cfg` under the `[InventoryExpansion]` category. You can also edit these through a MelonPreferences UI.
 
+The host controls `Enabled`, `AdditionalSlots`, `ReduceMovementSpeed`, `FillBackpackFirst`, and `BlockLargeItemsInBackpack` for the lobby. Joining clients use those values automatically without changing their local config. `BackpackKey`, `SelectBackpackSlotOnOpen`, and `RestoreStandardSlotOnClose` stay local. A host without InventoryExpansion uses the standard 4-slot inventory and no backpack. Shared-setting changes apply to the next lobby.
+
 | Option | Description | Default | Values/Range |
 |--------|-------------|---------|--------------|
 | `Enabled` | Enable InventoryExpansion functionality. When disabled, the mod will not modify game behavior. | `true` | `true` / `false` |
@@ -89,7 +91,7 @@ Stored in `UserData/MelonPreferences.cfg` under the `[InventoryExpansion]` categ
 - With `ReduceMovementSpeed` on, you move at 50% speed while the backpack is fully open, and full speed is restored when it closes.
 - The panel auto-hides during loading screens and map changes, and when you leave the game or return to the title screen.
 
-In multiplayer, install the mod on the host and clients using the extra slots, with matching `AdditionalSlots` settings. Backpack-first pickup applies to the host's own inventory.
+In multiplayer, install the mod on the host and clients using the extra slots. Clients automatically use the host's slot count and gameplay settings. Backpack-first pickup applies to the host's own inventory.
 
 Source code and issues: [github.com/DooDesch-Mods/Mimesis-InventoryExpansion](https://github.com/DooDesch-Mods/Mimesis-InventoryExpansion).
 

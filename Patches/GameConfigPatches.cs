@@ -3,70 +3,70 @@ using System.Reflection;
 using HarmonyLib;
 using InventoryExpansion.Config;
 using MelonLoader;
+using Mimic.Actors;
 
 namespace InventoryExpansion.Patches
 {
 	[HarmonyPatch(typeof(Hub))]
 	internal static class GameConfigPatches
 	{
-		private static bool _slotsAlreadyExpanded;
+		private static object _baselinePlayerActor;
+		private static int _baseSlots;
 
 		[HarmonyPostfix]
 		[HarmonyPatch("Awake")]
-		private static void Hub_Awake_Postfix(Hub __instance)
+		private static void Hub_Awake_Postfix(Hub __instance) => ApplyEffectiveSettings(__instance);
+
+		internal static void ApplyEffectiveSettings(Hub hub = null)
 		{
 			try
 			{
-				if (!InventoryExpansionPreferences.Enabled)
+				hub = hub ?? Hub.s;
+				if (hub == null) return;
+				var configField = typeof(Hub).GetField("gameConfig", BindingFlags.Instance | BindingFlags.NonPublic);
+				var config = configField?.GetValue(hub);
+				if (config == null)
 				{
+					MelonLogger.Warning("InventoryExpansion: gameConfig is null, cannot apply inventory capacity.");
 					return;
 				}
-
-				if (_slotsAlreadyExpanded)
+				var playerActorField = config.GetType().GetField("playerActor", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				var playerActor = playerActorField?.GetValue(config);
+				var slotField = playerActor?.GetType().GetField("maxGenericInventorySlot", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				if (slotField == null)
 				{
+					MelonLogger.Error("InventoryExpansion: PlayerActor.maxGenericInventorySlot not found - cannot apply inventory capacity.");
 					return;
 				}
-
-				FieldInfo gameConfigField = typeof(Hub).GetField("gameConfig", BindingFlags.Instance | BindingFlags.NonPublic);
-				object gameConfig = gameConfigField?.GetValue(__instance);
-				if (gameConfig == null)
+				if (!ReferenceEquals(_baselinePlayerActor, playerActor))
 				{
-					MelonLogger.Warning("InventoryExpansion: gameConfig is null, cannot adjust inventory slot count.");
-					return;
+					_baseSlots = (int)slotField.GetValue(playerActor);
+					_baselinePlayerActor = playerActor;
 				}
-
-				FieldInfo playerActorField = gameConfig.GetType().GetField("playerActor", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-				object playerActor = playerActorField?.GetValue(gameConfig);
-				if (playerActor == null)
-				{
-					MelonLogger.Warning("InventoryExpansion: gameConfig.playerActor is null, cannot adjust inventory slot count.");
-					return;
-				}
-
-				FieldInfo maxSlotField = playerActor.GetType().GetField("maxGenericInventorySlot", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-				if (maxSlotField == null)
-				{
-					MelonLogger.Warning("InventoryExpansion: PlayerActor.maxGenericInventorySlot field not found.");
-					return;
-				}
-
-				int baseSlots = (int)(maxSlotField.GetValue(playerActor) ?? 4);
-				int additionalSlots = InventoryExpansionPreferences.AdditionalSlots;
-				if (additionalSlots <= 0)
-				{
-					MelonLogger.Msg($"InventoryExpansion: keeping base inventory slots = {baseSlots}.");
-					return;
-				}
-
-				int newSlots = baseSlots + additionalSlots;
-				maxSlotField.SetValue(playerActor, newSlots);
-				_slotsAlreadyExpanded = true;
-				MelonLogger.Msg($"InventoryExpansion: expanded inventory slots from {baseSlots} to {newSlots}.");
+				int target = _baseSlots + (InventoryExpansionPreferences.Enabled ? InventoryExpansionPreferences.AdditionalSlots : 0);
+				int current = (int)slotField.GetValue(playerActor);
+				if (current == target) return;
+				slotField.SetValue(playerActor, target);
+				MelonLogger.Msg($"InventoryExpansion: set inventory capacity from {current} to {target}.");
 			}
 			catch (Exception ex)
 			{
-				MelonLogger.Error($"InventoryExpansion: failed to adjust inventory slot size: {ex}");
+				MelonLogger.Error($"InventoryExpansion: failed to apply inventory capacity: {ex}");
 			}
 		}
+	}
+
+	[HarmonyPatch(typeof(ProtoActor), "Awake")]
+	internal static class InventoryCapacityBeforeActorPatch
+	{
+		[HarmonyPrefix]
+		private static void Prefix() => GameConfigPatches.ApplyEffectiveSettings();
+	}
+
+	[HarmonyPatch(typeof(UIPrefab_Inventory), "Awake")]
+	internal static class InventoryCapacityBeforeUiPatch
+	{
+		[HarmonyPrefix]
+		private static void Prefix() => GameConfigPatches.ApplyEffectiveSettings();
 	}
 }

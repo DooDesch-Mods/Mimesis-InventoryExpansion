@@ -4,6 +4,12 @@ All notable changes to InventoryExpansion are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.4.7] - 2026-10-11
+
+- Automatically use the host's backpack capacity and gameplay settings for the lobby while keeping your key and selection options local.
+- Keep local config values when joining another host and use the vanilla inventory when the host has no InventoryExpansion.
+- Preserve the host's backpack capacity after revival and restore local panel and movement state when leaving a session.
+
 ## [1.4.6] - 2026-10-11
 
 - Built against MIMESIS 0.3.2. Backpack settings are unchanged.
