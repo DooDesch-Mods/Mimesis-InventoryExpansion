@@ -4,6 +4,16 @@ All notable changes to InventoryExpansion are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.4.10] - 2026-10-27
+
+### Fixed
+
+- Accept every whole-number backpack capacity from 4 to 24 instead of rounding settings to 4, 9 or 16. Joining clients use the host's chosen count.
+
+### Changed
+
+- Use real gameplay photos for the package icon, thumbnail, banner and gallery.
+
 ## [1.4.9] - 2026-10-27
 
 ### Fixed

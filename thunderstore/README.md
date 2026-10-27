@@ -6,14 +6,16 @@
 > Adds extra backpack slots beneath the inventory HUD. Press `C` to raise the hotbar and reveal them, using the game's own slot frames and key hint.
 > Carry more loot without permanently cluttering the standard 4-slot hotbar. Standalone, no MimicAPI required.
 
-![Version](https://img.shields.io/badge/version-1.4.9-blue)
+![Version](https://img.shields.io/badge/version-1.4.10-blue)
 ![Game](https://img.shields.io/badge/game-MIMESIS-purple)
 ![MelonLoader](https://img.shields.io/badge/MelonLoader-0.7.3+-green)
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
 
+![InventoryExpansion in MIMESIS](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/docs/img/header.jpg)
+
 ## Features
 
-- Adds 4, 9, or 16 usable inventory slots and preserves the native cosmetic and equipment slots. Carried bags add their normal capacity bonus.
+- Adds any whole number from 4 to 24 usable inventory slots and preserves the native cosmetic and equipment slots. Carried bags add their normal capacity bonus.
 - Toggle between the standard hotbar and the backpack with a configurable key (default `C`); the mod reads the key live each frame.
 - Opening raises only the inventory HUD, including equipment and weight. The backpack sits below it with native slot artwork, a faint backing and small side marks.
 - Rows have at most 8 slots and stay centered and balanced: 9 slots use 5+4, 12 use 6+6, 14 use 7+7, and 18 use 6+6+6.
@@ -27,21 +29,13 @@
 
 ## Screenshots
 
-**Open with items** - the native inventory HUD moves up above the backpack.
+**Open with loot** - press `C` to raise the native inventory HUD and reveal the backpack underneath.
 
-![Backpack open with items](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-open.png)
+![Open backpack with different items and native counters](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/docs/img/backpack-open.jpg)
 
-**Nine slots** - two centered rows of 5 and 4.
+**Room for more** - choose any whole number from 4 to 24 extra slots. Rows stay centered and use at most eight slots each.
 
-![Nine backpack slots](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-9-slots.png)
-
-**Sixteen slots** - two rows of 8.
-
-![Sixteen backpack slots](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-16-slots.png)
-
-**Closed** - the hotbar returns to its original height and the small key hint remains.
-
-![Closed backpack key hint](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-peek.png)
+![Sixteen backpack slots in two rows of eight](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/docs/img/backpack-16.jpg)
 
 ## Requirements
 
@@ -73,7 +67,7 @@ The host controls `Enabled`, `AdditionalSlots`, `ReduceMovementSpeed`, `FillBack
 | Option | Description | Default | Values/Range |
 |--------|-------------|---------|--------------|
 | `Enabled` | Enable InventoryExpansion functionality. When disabled, the mod will not modify game behavior. | `true` | `true` / `false` |
-| `AdditionalSlots` | Number of extra inventory slots to add on top of the game's default inventory size. Valid values: 4, 9, or 16. Rows are balanced with at most 8 slots each. Other values are rounded to the nearest valid option. | `4` | `4`, `9`, or `16` |
+| `AdditionalSlots` | Number of extra inventory slots to add on top of the game's default inventory size. Any whole number from 4 to 24. Rows are balanced with at most 8 slots each. Values outside this range are clamped. | `4` | `4` to `24` (clamped on load) |
 | `BackpackKey` | Key to toggle backpack visibility. Press to switch between standard inventory and backpack. | `C` | A `UnityEngine.KeyCode` name that is also supported by the Unity Input System. Invalid or empty values fall back to `C`. |
 | `ReduceMovementSpeed` | When enabled, player movement speed is reduced to 50% while the backpack is fully open. | `true` | `true` / `false` |
 | `SelectBackpackSlotOnOpen` | When opening the backpack, move the selected slot to the first backpack slot. | `true` | `true` / `false` |
@@ -94,8 +88,10 @@ In multiplayer, install the mod on the host and clients using the extra slots. C
 
 Source code and issues: [github.com/DooDesch-Mods/Mimesis-InventoryExpansion](https://github.com/DooDesch-Mods/Mimesis-InventoryExpansion).
 
-## AI disclosure
+## Images
 
-The mod icon is AI-generated.
+Screenshots and the package icon are captured in MIMESIS.
 
 Built against MIMESIS 0.4.0 / MelonLoader 0.7.3.
+
+Use InventoryExpansion 1.4.10 or later on both host and clients for counts other than 4, 9 or 16.
