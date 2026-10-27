@@ -41,7 +41,7 @@ namespace InventoryExpansion.Config
 				"AdditionalSlots",
 				4,
 				"Additional Inventory Slots",
-				"Number of extra inventory slots to add on top of the game's default inventory size. Valid values: 4, 9, or 16 (for square grids: 2x2, 3x3, or 4x4). Other values will be rounded to the nearest valid option."
+				"Number of extra inventory slots to add on top of the game's default inventory size. Any whole number from 4 to 24 is supported. Rows stay balanced with at most eight slots each. Values outside this range are clamped."
 			);
 			_backpackKey = CreateEntry(
 				"BackpackKey",
@@ -90,7 +90,7 @@ namespace InventoryExpansion.Config
 			_additionalSlots.Value = ClampToValidBackpackSize(_additionalSlots.Value);
 			var hostSettings = new HostSettings(CategoryId);
 			_effectiveEnabled = hostSettings.Register(_enabled, false);
-			_effectiveAdditionalSlots = hostSettings.Register(_additionalSlots, 0, value => value == 0 || value == 4 || value == 9 || value == 16);
+			_effectiveAdditionalSlots = hostSettings.Register(_additionalSlots, 0, value => value == 0 || (value >= 4 && value <= 24));
 			_effectiveReduceMovementSpeed = hostSettings.Register(_reduceMovementSpeed, false);
 			_effectiveFillBackpackFirst = hostSettings.Register(_fillBackpackFirst, false);
 			_effectiveBlockLargeItemsInBackpack = hostSettings.Register(_blockLargeItemsInBackpack, false);
@@ -111,22 +111,7 @@ namespace InventoryExpansion.Config
 
 		private static int ClampToValidBackpackSize(int value)
 		{
-			if (value <= 0)
-			{
-				return 4;
-			}
-
-			if (value <= 6)
-			{
-				return 4;
-			}
-
-			if (value <= 12)
-			{
-				return 9;
-			}
-
-			return 16;
+			return Math.Clamp(value, 4, 24);
 		}
 
 		internal static int AdditionalSlots => _effectiveAdditionalSlots?.Value ?? ClampToValidBackpackSize(_additionalSlots?.Value ?? 4);
