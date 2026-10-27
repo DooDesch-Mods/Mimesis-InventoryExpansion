@@ -1,133 +1,41 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using HarmonyLib;
 using InventoryExpansion.Config;
-using MelonLoader;
 
 namespace InventoryExpansion.Patches
 {
-	[HarmonyPatch(typeof(InventoryController))]
-	internal static class InventoryControllerPatches
-	{
-		[HarmonyPostfix]
-		[HarmonyPatch("Reset")]
-		private static void Reset_Postfix(InventoryController __instance)
-		{
-			try
-			{
-				if (!InventoryExpansionPreferences.Enabled)
-				{
-					return;
-				}
+    [HarmonyPatch]
+    internal static class InventoryControllerPatches
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(InventoryController), nameof(InventoryController.Reset));
+            yield return AccessTools.Method(typeof(InventoryController), nameof(InventoryController.RecalculateSlotCount));
+        }
 
-				var hub = Hub.s;
+        private static int GetBasicSlotCount(InventoryController inventory) =>
+            4 + (inventory.HasDedicatedSlots && InventoryExpansionPreferences.Enabled
+                ? InventoryExpansionPreferences.AdditionalSlots : 0);
 
-				FieldInfo gameConfigField = typeof(Hub).GetField("gameConfig", BindingFlags.Instance | BindingFlags.NonPublic);
-				object gameConfig = gameConfigField?.GetValue(hub);
-				if (gameConfig == null)
-				{
-					return;
-				}
-
-				FieldInfo playerActorField = gameConfig.GetType().GetField("playerActor", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-				object playerActor = playerActorField?.GetValue(gameConfig);
-				if (playerActor == null)
-				{
-					return;
-				}
-
-				FieldInfo maxSlotField = playerActor.GetType().GetField("maxGenericInventorySlot", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-				if (maxSlotField == null)
-				{
-					return;
-				}
-
-				int maxSlots = (int)(maxSlotField.GetValue(playerActor) ?? 4);
-				if (maxSlots <= 4)
-				{
-					return;
-				}
-
-				var field = typeof(InventoryController).GetField("_inventorySlots", BindingFlags.Instance | BindingFlags.NonPublic);
-				if (field == null)
-				{
-					MelonLogger.Warning("InventoryExpansion: failed to find InventoryController._inventorySlots field.");
-					return;
-				}
-
-				if (field.GetValue(__instance) is not IDictionary dict)
-				{
-					MelonLogger.Warning("InventoryExpansion: InventoryController._inventorySlots is not an IDictionary.");
-					return;
-				}
-
-				EnsureSlotCapacity(dict, maxSlots);
-
-				MelonLogger.Msg($"InventoryExpansion: InventoryController extended to {maxSlots} slots.");
-			}
-			catch (Exception ex)
-			{
-				MelonLogger.Error($"InventoryExpansion: failed to extend InventoryController slots: {ex}");
-			}
-		}
-
-		internal static void EnsureSlotCapacity(IDictionary slots, int capacity)
-		{
-			for (int i = 5; i <= capacity; i++)
-			{
-				if (!slots.Contains(i)) slots[i] = null;
-			}
-		}
-
-		[HarmonyPrefix]
-		[HarmonyPatch("InvenFull")]
-		private static bool InvenFull_Prefix(InventoryController __instance, ref bool __result)
-		{
-			try
-			{
-				if (!InventoryExpansionPreferences.Enabled)
-				{
-					return true;
-				}
-
-				var hub = Hub.s;
-				if (hub == null)
-				{
-					return true;
-				}
-
-				FieldInfo gameConfigField = typeof(Hub).GetField("gameConfig", BindingFlags.Instance | BindingFlags.NonPublic);
-				object gameConfig = gameConfigField?.GetValue(hub);
-				FieldInfo playerActorField = gameConfig?.GetType().GetField("playerActor", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-				object playerActor = playerActorField?.GetValue(gameConfig);
-				FieldInfo maxSlotField = playerActor?.GetType().GetField("maxGenericInventorySlot", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-				int maxSlots = (int)(maxSlotField?.GetValue(playerActor) ?? 4);
-
-				var field = typeof(InventoryController).GetField("_inventorySlots", BindingFlags.Instance | BindingFlags.NonPublic);
-				if (field?.GetValue(__instance) is not IDictionary dict)
-				{
-					return true;
-				}
-
-				int filled = 0;
-				foreach (DictionaryEntry entry in dict)
-				{
-					if (entry.Value != null)
-					{
-						filled++;
-					}
-				}
-
-				__result = filled >= maxSlots;
-				return false;
-			}
-			catch (Exception ex)
-			{
-				MelonLogger.Error($"InventoryExpansion: InvenFull prefix failed, falling back to original. {ex}");
-				return true;
-			}
-		}
-	}
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var codes = new List<CodeInstruction>(instructions);
+            var dedicated = AccessTools.Method(typeof(InventoryController), "GetDedicatedSlotCount");
+            for (int i = 0; i + 3 < codes.Count; i++)
+            {
+                if (!codes[i].LoadsConstant(4) || codes[i + 1].opcode != OpCodes.Ldarg_0 ||
+                    !codes[i + 2].Calls(dedicated) || codes[i + 3].opcode != OpCodes.Add) continue;
+                // Add capacity before the native dedicated-slot and bag calculations.
+                codes[i].opcode = OpCodes.Ldarg_0;
+                codes[i].operand = null;
+                codes.Insert(i + 1, new CodeInstruction(OpCodes.Call,
+                    AccessTools.Method(typeof(InventoryControllerPatches), nameof(GetBasicSlotCount))));
+                return codes;
+            }
+            throw new InvalidOperationException("[InventoryExpansion] Native base inventory capacity calculation was not found.");
+        }
+    }
 }

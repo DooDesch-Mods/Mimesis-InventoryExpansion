@@ -4,6 +4,20 @@ All notable changes to InventoryExpansion are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.4.8] - 2026-10-27
+
+### Changed
+
+- Open the backpack beneath the native inventory HUD, raising only the hotbar, equipment and weight display. Use the game's slot frames and a small native key badge at the bottom.
+- Balance and center backpack rows with at most eight slots per row, including capacity added by carried bags.
+
+### Fixed
+
+- Preserve the MIMESIS 0.4.0 cosmetic and equipment slots when placing and selecting items.
+- Keep configured extra capacity during native inventory recalculations and combine it with the strongest carried bag's bonus.
+- Keep backpack-first pickups inside usable generic slots and preserve native item setup and dedicated-slot priority.
+- Build complete native slot UI objects and keep the backpack grid aligned with the active inventory capacity.
+
 ## [1.4.7] - 2026-10-11
 
 - Automatically use the host's backpack capacity and gameplay settings for the lobby while keeping your key and selection options local.

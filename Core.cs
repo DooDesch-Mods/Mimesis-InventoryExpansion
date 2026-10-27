@@ -23,7 +23,6 @@ namespace InventoryExpansion
 		{
 			Patches.BackpackPanelPatch.ResetForSettingsChange();
 			Patches.BackpackMovementSpeedPatch.ResetLocalState();
-			Patches.GameConfigPatches.ApplyEffectiveSettings();
 		}
 
 		public override void OnUpdate() => DooDesch.HostSettings.Update();
