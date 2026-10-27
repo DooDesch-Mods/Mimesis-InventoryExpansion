@@ -4,6 +4,13 @@ All notable changes to InventoryExpansion are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.4.9] - 2026-10-27
+
+### Fixed
+
+- Keep backpack frames the same size and proportions as the native hotbar. Version 1.4.8 incorrectly added icon layout padding to the frame height, stretching the slots vertically.
+- Keep backpack rows and the key badge centered beneath the hotbar when the native equipment group changes its position.
+
 ## [1.4.8] - 2026-10-27
 
 ### Changed

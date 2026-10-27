@@ -24,6 +24,7 @@ namespace InventoryExpansion.Patches
         private static RectTransform _nativeHud;
         private static Vector2 _hudRest;
         private static RectTransform _backpackPanel;
+        private static RectTransform _firstNativeSlot, _lastNativeSlot;
         private static GameObject _bodyVisuals;
         private static UIPrefab_KeyIcon _keyBadge;
         private static readonly List<GameObject> Containers = new();
@@ -78,6 +79,7 @@ namespace InventoryExpansion.Patches
             HideBackpackCompletely();
             if (_backpackPanel != null) UnityEngine.Object.Destroy(_backpackPanel.gameObject);
             Containers.Clear();
+            _firstNativeSlot = _lastNativeSlot = null;
             _keyBadge = null;
             _inventoryUi = ui;
             _nativeHud = ui.UE_rootNode as RectTransform;
@@ -106,9 +108,11 @@ namespace InventoryExpansion.Patches
             if (count <= 0) return;
             int[] rows = BackpackLayout.Rows(count);
             var source = (RectTransform)slots[0].root.transform;
-            var layout = source.GetComponent<HorizontalLayoutGroup>();
-            float cellWidth = slots[0].image.rectTransform.rect.width + (layout?.padding.horizontal ?? 0);
-            float cellHeight = slots[0].image.rectTransform.rect.height + (layout?.padding.vertical ?? 0);
+            _firstNativeSlot = source;
+            _lastNativeSlot = (RectTransform)slots[3].root.transform;
+            // The native layout has already sized the slot root; icon padding does not describe its frame.
+            float cellWidth = source.rect.width;
+            float cellHeight = source.rect.height;
             if (cellWidth <= 0 || cellHeight <= 0) throw new InvalidOperationException("Native inventory slot dimensions are not ready.");
             float gap = (source.parent.GetComponent<HorizontalLayoutGroup>()?.spacing ?? 15f);
             float rowGap = 8f;
@@ -167,6 +171,17 @@ namespace InventoryExpansion.Patches
             _slotsMoved = true;
             ApplyOffset(_targetOpen ? _openOffset : 0);
             ShowContents(_targetOpen);
+        }
+
+        internal static void FollowNativeHud()
+        {
+            if (_backpackPanel == null || !_backpackPanel.gameObject.activeInHierarchy ||
+                _firstNativeSlot == null || _lastNativeSlot == null) return;
+            // Equipment changes can move the native hotbar without changing backpack capacity.
+            var parent = _backpackPanel.parent;
+            float first = parent.InverseTransformPoint(_firstNativeSlot.position).x;
+            float last = parent.InverseTransformPoint(_lastNativeSlot.position).x;
+            _backpackPanel.anchoredPosition = new Vector2((first + last) / 2, _backpackPanel.anchoredPosition.y);
         }
 
         private static Image RectImage(string name, Vector2 size, Vector2 position, Color color)
@@ -646,6 +661,7 @@ namespace InventoryExpansion.Patches
 			if (_initialized) return;
 			
 			SceneManager.activeSceneChanged += OnActiveSceneChanged;
+            Canvas.willRenderCanvases += BackpackPanelPatch.FollowNativeHud;
 			_initialized = true;
 		}
 
