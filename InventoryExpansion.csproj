@@ -38,27 +38,10 @@
 		<Reference Include="UnityEngine.UI">
 			<HintPath>$(GameManagedPath)/UnityEngine.UI.dll</HintPath>
 		</Reference>
-		<Reference Include="UnityEngine.ImageConversionModule">
-			<HintPath>$(GameManagedPath)/UnityEngine.ImageConversionModule.dll</HintPath>
-		</Reference>
 		<Reference Include="UnityEngine.UIModule">
 			<HintPath>$(GameManagedPath)/UnityEngine.UIModule.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
-	<ItemGroup>
-		<!-- Embedded so the backpack image ships inside the DLL. Release zips do not include the loose
-		     asset, and the runtime loads it from the embedded resource (with an external-file override). -->
-		<EmbeddedResource Include="Assets\Backpack.png" />
-	</ItemGroup>
-
-	<!-- The DLL copy itself lives in Deploy.props. Only the loose asset is mod specific: it is the
-	     external-file override the runtime prefers over the embedded copy, so a test install needs it
-	     next to the DLL. -->
-	<Target Name="DeployBackpackAsset" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
-		<Exec Condition="Exists('$(ModsDirectory)') And Exists('$(TargetDir)Assets\Backpack.png')"
-		      Command="cmd /c if not exist &quot;$(ModsDirectory)\Assets&quot; mkdir &quot;$(ModsDirectory)\Assets&quot; &amp;&amp; copy /Y &quot;$(TargetDir)Assets\Backpack.png&quot; &quot;$(ModsDirectory)\Assets\Backpack.png&quot;"
-		      ContinueOnError="true" />
-	</Target>
 
 </Project>

@@ -95,60 +95,17 @@ namespace InventoryExpansion.Patches
 					return true;
 				}
 
-				int currentSlot = (int)(selectedSlotIndexField.GetValue(__instance) ?? 0);
-				int slotSize = (int)(slotSizeField.GetValue(__instance) ?? 4);
+                int currentSlot = (int)selectedSlotIndexField.GetValue(__instance);
+                bool open = BackpackPanelPatch.IsBackpackFullyVisible;
+                var visible = (System.Collections.Generic.List<int>)inventoryType.GetMethod("GetVisibleSlotIndices").Invoke(__instance, null);
+                var candidates = visible.FindAll(index => (index >= Mimic.InvenSlotLayout.FirstExtensionSlotKey - 1) == open);
+                if (candidates.Count == 0) return false;
+                int current = candidates.IndexOf(currentSlot);
+                int next = current < 0 ? (forward ? 0 : candidates.Count - 1)
+                    : (current + (forward ? 1 : -1) + candidates.Count) % candidates.Count;
+                InventorySelectionHelper.GetSelectSlotMethod(inventoryType).Invoke(__instance, new object[] { candidates[next] });
+                return false;
 
-				bool isBackpackVisible = BackpackPanelPatch.IsBackpackFullyVisible;
-				int minSlot, maxSlot;
-
-				if (isBackpackVisible)
-				{
-					minSlot = 4;
-					maxSlot = slotSize - 1;
-				}
-				else
-				{
-					minSlot = 0;
-					maxSlot = 3;
-				}
-
-				if (minSlot > maxSlot || currentSlot < minSlot || currentSlot > maxSlot)
-				{
-					var selectSlotMethod = inventoryType.GetMethod("SelectSlot", BindingFlags.Instance | BindingFlags.NonPublic);
-					if (selectSlotMethod != null)
-					{
-						selectSlotMethod.Invoke(__instance, new object[] { minSlot });
-						return false;
-					}
-					return true;
-				}
-
-				int newSlot;
-				if (forward)
-				{
-					newSlot = currentSlot + 1;
-					if (newSlot > maxSlot)
-					{
-						newSlot = minSlot;
-					}
-				}
-				else
-				{
-					newSlot = currentSlot - 1;
-					if (newSlot < minSlot)
-					{
-						newSlot = maxSlot;
-					}
-				}
-
-				var selectSlotMethod2 = inventoryType.GetMethod("SelectSlot", BindingFlags.Instance | BindingFlags.NonPublic);
-				if (selectSlotMethod2 != null)
-				{
-					selectSlotMethod2.Invoke(__instance, new object[] { newSlot });
-					return false;
-				}
-
-				return true;
 			}
 			catch (Exception ex)
 			{

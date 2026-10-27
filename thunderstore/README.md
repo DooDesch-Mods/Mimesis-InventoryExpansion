@@ -3,21 +3,22 @@
 > 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/inventoryexpansion](https://support.doodesch.de/inventoryexpansion).
 
 
-> Adds extra backpack inventory slots you toggle on demand with a configurable key, shown in a custom animated panel that slides in and out.
+> Adds extra backpack slots beneath the inventory HUD. Press `C` to raise the hotbar and reveal them, using the game's own slot frames and key hint.
 > Carry more loot without permanently cluttering the standard 4-slot hotbar. Standalone, no MimicAPI required.
 
-![Version](https://img.shields.io/badge/version-1.4.7-blue)
+![Version](https://img.shields.io/badge/version-1.4.8-blue)
 ![Game](https://img.shields.io/badge/game-MIMESIS-purple)
 ![MelonLoader](https://img.shields.io/badge/MelonLoader-0.7.3+-green)
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
 
 ## Features
 
-- Adds 4, 9, or 16 extra inventory slots laid out as a square grid (2x2, 3x3, or 4x4); the count is configurable. The new slots are real, usable inventory, not just a visual overlay.
+- Adds 4, 9, or 16 usable inventory slots and preserves the native cosmetic and equipment slots. Carried bags add their normal capacity bonus.
 - Toggle between the standard hotbar and the backpack with a configurable key (default `C`); the mod reads the key live each frame.
-- Extra slots render in a custom backpack UI panel that uses the embedded sprite and slides in and out with a short eased animation. If the image cannot load it falls back to a translucent black panel.
-- Shows a visual key hint on the panel displaying the currently configured toggle key.
-- Context-aware slot scrolling: while the backpack is open, slot cycling affects only the backpack slots; while it is closed, it affects only the standard 4 slots.
+- Opening raises only the inventory HUD, including equipment and weight. The backpack sits below it with native slot artwork, a faint backing and small side marks.
+- Rows have at most 8 slots and stay centered and balanced: 9 slots use 5+4, 12 use 6+6, 14 use 7+7, and 18 use 6+6+6.
+- A small native key badge at the bottom shows the configured toggle key.
+- While open, slot cycling affects backpack slots. While closed, it follows the visible native hotbar, cosmetic and equipment slots.
 - Cursor handoff on toggle: opening the backpack moves your selection to the first backpack slot, and closing it returns the selection to the standard inventory, so the cursor never stays stuck on a hidden slot. Each direction is configurable.
 - Optional backpack-first pickup: while the backpack is open, items you pick up fill the backpack slots before the standard inventory (host / single-player only).
 - Optional movement-speed reduction to 50% while the backpack is fully open, restored automatically when it closes.
@@ -26,27 +27,27 @@
 
 ## Screenshots
 
-**Open with loot** - the extra backpack slots hold real items.
+**Open with items** - the native inventory HUD moves up above the backpack.
 
 ![Backpack open with items](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-open.png)
 
-**Toggle with a key** (default `C`).
+**Nine slots** - two centered rows of 5 and 4.
 
-![Opening and closing the backpack](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-toggle.gif)
+![Nine backpack slots](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-9-slots.png)
 
-**Configurable grid sizes** (`AdditionalSlots`) and the resting peek state with the key hint.
+**Sixteen slots** - two rows of 8.
 
-![9 slots, 3x3](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-9-slots.png)
+![Sixteen backpack slots](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-16-slots.png)
 
-![16 slots, 4x4](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-16-slots.png)
+**Closed** - the hotbar returns to its original height and the small key hint remains.
 
-![Resting peek](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-peek.png)
+![Closed backpack key hint](https://raw.githubusercontent.com/DooDesch-Mods/Mimesis-InventoryExpansion/main/Screenshots/backpack-peek.png)
 
 ## Requirements
 
 | Component | Version |
 |-----------|---------|
-| MIMESIS | 0.3.2 |
+| MIMESIS | 0.4.0 |
 | MelonLoader | 0.7.3+ |
 
 Dependency: [LavaGang-MelonLoader-0.7.3](https://thunderstore.io/c/mimesis/p/LavaGang/MelonLoader/).
@@ -55,7 +56,7 @@ Dependency: [LavaGang-MelonLoader-0.7.3](https://thunderstore.io/c/mimesis/p/Lav
 
 ### Recommended: Thunderstore mod manager
 
-Install through a Thunderstore mod manager such as [r2modman](https://thunderstore.io/package/ebkr/r2modman/) or [Gale](https://thunderstore.io/package/Kesomannen/GaleModManager/). The MelonLoader dependency and the backpack asset are handled automatically.
+Install through a Thunderstore mod manager such as [r2modman](https://thunderstore.io/package/ebkr/r2modman/) or [Gale](https://thunderstore.io/package/Kesomannen/GaleModManager/). The MelonLoader dependency is handled automatically.
 
 ### Manual
 
@@ -63,18 +64,16 @@ Install through a Thunderstore mod manager such as [r2modman](https://thundersto
 2. Download this package and place `InventoryExpansion.dll` into `MIMESIS/Mods/`.
 3. Launch the game once to generate the configuration file at `UserData/MelonPreferences.cfg`.
 
-The backpack image is embedded in the DLL. To use your own image, place it at `MIMESIS/Mods/Assets/Backpack.png`.
-
 ## Configuration
 
 Stored in `UserData/MelonPreferences.cfg` under the `[InventoryExpansion]` category. You can also edit these through a MelonPreferences UI.
 
-The host controls `Enabled`, `AdditionalSlots`, `ReduceMovementSpeed`, `FillBackpackFirst`, and `BlockLargeItemsInBackpack` for the lobby. Joining clients use those values automatically without changing their local config. `BackpackKey`, `SelectBackpackSlotOnOpen`, and `RestoreStandardSlotOnClose` stay local. A host without InventoryExpansion uses the standard 4-slot inventory and no backpack. Shared-setting changes apply to the next lobby.
+The host controls `Enabled`, `AdditionalSlots`, `ReduceMovementSpeed`, `FillBackpackFirst`, and `BlockLargeItemsInBackpack` for the lobby. Joining clients use those values automatically without changing their local config. `BackpackKey`, `SelectBackpackSlotOnOpen`, and `RestoreStandardSlotOnClose` stay local. A host without InventoryExpansion uses native inventory capacity and no mod backpack. Shared-setting changes apply to the next lobby.
 
 | Option | Description | Default | Values/Range |
 |--------|-------------|---------|--------------|
 | `Enabled` | Enable InventoryExpansion functionality. When disabled, the mod will not modify game behavior. | `true` | `true` / `false` |
-| `AdditionalSlots` | Number of extra inventory slots to add on top of the game's default inventory size. Valid values: 4, 9, or 16 (square grids 2x2, 3x3, 4x4). Other values are rounded to the nearest valid option. | `4` | `4`, `9`, or `16` |
+| `AdditionalSlots` | Number of extra inventory slots to add on top of the game's default inventory size. Valid values: 4, 9, or 16. Rows are balanced with at most 8 slots each. Other values are rounded to the nearest valid option. | `4` | `4`, `9`, or `16` |
 | `BackpackKey` | Key to toggle backpack visibility. Press to switch between standard inventory and backpack. | `C` | A `UnityEngine.KeyCode` name that is also supported by the Unity Input System. Invalid or empty values fall back to `C`. |
 | `ReduceMovementSpeed` | When enabled, player movement speed is reduced to 50% while the backpack is fully open. | `true` | `true` / `false` |
 | `SelectBackpackSlotOnOpen` | When opening the backpack, move the selected slot to the first backpack slot. | `true` | `true` / `false` |
@@ -84,8 +83,8 @@ The host controls `Enabled`, `AdditionalSlots`, `ReduceMovementSpeed`, `FillBack
 
 ## Usage
 
-- Press the configured toggle key (default `C`) to slide the backpack panel in and out. The panel sits at the bottom-right of the screen and shows a key hint.
-- When the backpack is open, slot scrolling and selection cycle only the backpack slots; when it is closed, they cycle only the standard 4 hotbar slots.
+- Press the configured toggle key (default `C`) to raise the inventory HUD and reveal the backpack underneath. Press it again to close the backpack and restore the original HUD height.
+- When the backpack is open, slot scrolling and selection cycle through its slots. When closed, native visible hotbar, cosmetic and equipment slots remain available.
 - Opening the backpack jumps your selection to the first backpack slot; closing it returns the selection to your previous standard slot, so the cursor is never stuck on a hidden slot (toggle each via `SelectBackpackSlotOnOpen` / `RestoreStandardSlotOnClose`).
 - With `FillBackpackFirst` on, items you pick up while the backpack is open go into backpack slots first. This changes server-side placement, so it only applies when you host or play single-player.
 - With `ReduceMovementSpeed` on, you move at 50% speed while the backpack is fully open, and full speed is restored when it closes.
@@ -99,4 +98,4 @@ Source code and issues: [github.com/DooDesch-Mods/Mimesis-InventoryExpansion](ht
 
 The mod icon is AI-generated.
 
-Built against MIMESIS 0.3.2 / MelonLoader 0.7.3.
+Built against MIMESIS 0.4.0 / MelonLoader 0.7.3.
