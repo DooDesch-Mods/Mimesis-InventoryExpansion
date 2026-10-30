@@ -262,6 +262,13 @@ namespace InventoryExpansion.Patches
             if (_animationCoroutine != null) MelonCoroutines.Stop(_animationCoroutine);
             _backpackPanel.gameObject.SetActive(true);
             ShowContents(_targetOpen);
+            if (InventoryExpansionPreferences.AnimationSeconds == 0)
+            {
+                ApplyOffset(_targetOpen ? _openOffset : 0);
+                _backpackFullyVisible = _targetOpen;
+                _animationCoroutine = null;
+                return;
+            }
             _animationCoroutine = MelonCoroutines.Start(Animate(_targetOpen));
         }
 
@@ -269,10 +276,11 @@ namespace InventoryExpansion.Patches
         {
             float start = _offset, target = open ? _openOffset : 0, elapsed = 0;
             _backpackFullyVisible = false;
-            while (elapsed < 0.25f && _nativeHud != null)
+            float duration = InventoryExpansionPreferences.AnimationSeconds;
+            while (elapsed < duration && _nativeHud != null)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float progress = Mathf.Clamp01(elapsed / 0.25f);
+                float progress = Mathf.Clamp01(elapsed / duration);
                 ApplyOffset(Mathf.Lerp(start, target, 1 - Mathf.Pow(1 - progress, 3)));
                 yield return null;
             }
@@ -580,8 +588,8 @@ namespace InventoryExpansion.Patches
 						_speedReducedActor = __instance;
 					}
 
-					moveSpeedWalkField.SetValue(netSyncActorData, (long)(_originalMoveSpeedWalk * 0.5f));
-					moveSpeedRunField.SetValue(netSyncActorData, (long)(_originalMoveSpeedRun * 0.5f));
+					moveSpeedWalkField.SetValue(netSyncActorData, (long)(_originalMoveSpeedWalk * InventoryExpansionPreferences.MovementSpeedMultiplier));
+					moveSpeedRunField.SetValue(netSyncActorData, (long)(_originalMoveSpeedRun * InventoryExpansionPreferences.MovementSpeedMultiplier));
 				}
 				else
 				{

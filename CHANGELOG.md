@@ -4,6 +4,14 @@ All notable changes to InventoryExpansion are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.5.0] - 2026-10-30
+
+### Changed
+
+- Apply host movement, pickup and large-item rules live; keep activation and capacity fixed until the next lobby.
+- Add a host movement-speed multiplier and local HUD animation duration, including instant opening.
+- Preserve native slot artwork, balanced rows and every whole capacity from 4 to 24.
+
 ## [1.4.10] - 2026-10-27
 
 ### Fixed
