@@ -6,7 +6,7 @@
 > Adds extra backpack slots beneath the inventory HUD. Press `C` to raise the hotbar and reveal them, using the game's own slot frames and key hint.
 > Carry more loot without permanently cluttering the standard 4-slot hotbar. Standalone, no MimicAPI required.
 
-![Version](https://img.shields.io/badge/version-1.4.10-blue)
+![Version](https://img.shields.io/badge/version-1.5.0-blue)
 ![Game](https://img.shields.io/badge/game-MIMESIS-purple)
 ![MelonLoader](https://img.shields.io/badge/MelonLoader-0.7.3+-green)
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
@@ -23,7 +23,7 @@
 - While open, slot cycling affects backpack slots. While closed, it follows the visible native hotbar, cosmetic and equipment slots.
 - Cursor handoff on toggle: opening the backpack moves your selection to the first backpack slot, and closing it returns the selection to the standard inventory, so the cursor never stays stuck on a hidden slot. Each direction is configurable.
 - Optional backpack-first pickup: while the backpack is open, items you pick up fill the backpack slots before the standard inventory (host / single-player only).
-- Optional movement-speed reduction to 50% while the backpack is fully open, restored automatically when it closes.
+- Configurable movement-speed reduction (50% by default) while the backpack is fully open, restored automatically when it closes.
 - Blocks large items from entering the open backpack and prevents opening it while holding one; configurable through `BlockLargeItemsInBackpack`.
 - Automatically hides the panel during loading screens and map changes, and when you leave the game or return to the title screen.
 
@@ -64,20 +64,24 @@ Install through a Thunderstore mod manager such as [r2modman](https://thundersto
 
 ## Configuration
 
-Stored in `UserData/MelonPreferences.cfg` under the `[InventoryExpansion]` category. You can also edit these through a MelonPreferences UI.
+Stored in `UserData/MelonPreferences.cfg` under `[InventoryExpansion]`.
 
-The host controls `Enabled`, `AdditionalSlots`, `ReduceMovementSpeed`, `FillBackpackFirst`, and `BlockLargeItemsInBackpack` for the lobby. Joining clients use those values automatically without changing their local config. `BackpackKey`, `SelectBackpackSlotOnOpen`, and `RestoreStandardSlotOnClose` stay local. A host without InventoryExpansion uses native inventory capacity and no mod backpack. Shared-setting changes apply to the next lobby.
+Gameplay settings follow the lobby host without overwriting saved client preferences. Without the mod on the host, clients use vanilla behavior. Live settings apply after the host changes them through a MelonPreferences UI or reloads the preferences; editing the file alone does not reload it. Use the same current mod version on host and clients for the new options and live updates. Older versions retain their initial legacy snapshot. Invalid new values use the registered default with a warning.
 
-| Option | Description | Default | Values/Range |
-|--------|-------------|---------|--------------|
-| `Enabled` | Enable InventoryExpansion functionality. When disabled, the mod will not modify game behavior. | `true` | `true` / `false` |
-| `AdditionalSlots` | Number of extra inventory slots to add on top of the game's default inventory size. Any whole number from 4 to 24. Rows are balanced with at most 8 slots each. Values outside this range are clamped. | `4` | `4` to `24` (clamped on load) |
-| `BackpackKey` | Key to toggle backpack visibility. Press to switch between standard inventory and backpack. | `C` | Any `UnityEngine.KeyCode` name (parsed case-insensitively). Invalid or empty values fall back to `C`. The key must also be a valid Unity Input System key name for the toggle to fire. |
-| `ReduceMovementSpeed` | When enabled, player movement speed is reduced to 50% while the backpack is fully open. | `true` | `true` / `false` |
-| `SelectBackpackSlotOnOpen` | When opening the backpack, move the selected slot to the first backpack slot. | `true` | `true` / `false` |
-| `RestoreStandardSlotOnClose` | When closing the backpack, return the selected slot to the standard inventory (the slot selected before opening). | `true` | `true` / `false` |
-| `FillBackpackFirst` | While the backpack is open, picked-up items fill the backpack slots before the standard inventory. Host / single-player only. | `true` | `true` / `false` |
-| `BlockLargeItemsInBackpack` | Block large items from entering the open backpack and prevent opening it while holding one. | `true` | `true` / `false` |
+`Enabled` and `AdditionalSlots` are structural and apply to the next lobby. Movement, pickup and large-item rules are live. Input, selection and HUD animation stay local.
+
+| Option | Default | Range and effect |
+|---|---|---|
+| `Enabled` | `true` | Host master switch, next lobby. |
+| `AdditionalSlots` | `4` | Host capacity, 4-24 whole slots, next lobby. Values outside the range are clamped on load. Native balanced rows use at most 8 columns. |
+| `ReduceMovementSpeed` | `true` | Apply the movement multiplier while the backpack is fully open. |
+| `MovementSpeedMultiplier` | `0.5` | Walking and running multiplier, 0-1. Zero stops movement, 1 keeps normal speed. |
+| `FillBackpackFirst` | `true` | Prefer the open backpack for the host's own pickups. |
+| `BlockLargeItemsInBackpack` | `true` | Restrict large items and opening while holding one. |
+| `BackpackKey` | `C` | Local toggle key; use a Unity key name supported by the Input System. Invalid or empty values fall back to C. |
+| `SelectBackpackSlotOnOpen` | `true` | Local selection handoff into the backpack. |
+| `RestoreStandardSlotOnClose` | `true` | Local return to the previous standard slot. |
+| `AnimationSeconds` | `0.25` | Local HUD animation, 0-2 seconds. Zero opens immediately. |
 
 ## Usage
 
@@ -85,7 +89,7 @@ The host controls `Enabled`, `AdditionalSlots`, `ReduceMovementSpeed`, `FillBack
 - When the backpack is open, slot scrolling and selection cycle through its slots. When closed, native visible hotbar, cosmetic and equipment slots remain available.
 - Opening the backpack jumps your selection to the first backpack slot; closing it returns the selection to your previous standard slot, so the cursor is never stuck on a hidden slot (toggle each via `SelectBackpackSlotOnOpen` / `RestoreStandardSlotOnClose`).
 - With `FillBackpackFirst` on, items you pick up while the backpack is open go into backpack slots first. This changes server-side placement, so it only applies when you host or play single-player.
-- With `ReduceMovementSpeed` on, you move at 50% speed while the backpack is fully open, and full speed is restored when it closes.
+- With `ReduceMovementSpeed` on, you move at the configured multiplier (50% by default) while the backpack is fully open, and full speed is restored when it closes.
 - The panel auto-hides during loading screens and map changes, and when you leave the game or return to the title screen.
 - Set `AdditionalSlots` (any whole number from 4 to 24) and `BackpackKey` in `UserData/MelonPreferences.cfg`; the mod reads the key live each frame.
 

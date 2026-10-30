@@ -23,6 +23,8 @@ namespace InventoryExpansion.Config
 		private static HostSetting<bool> _effectiveReduceMovementSpeed;
 		private static HostSetting<bool> _effectiveFillBackpackFirst;
 		private static HostSetting<bool> _effectiveBlockLargeItemsInBackpack;
+		private static HostSetting<float> _movementSpeedMultiplier;
+		private static MelonPreferences_Entry<float> _animationSeconds;
 		internal static event Action EffectiveValuesChanged;
 #if DEBUG
 		private static MelonPreferences_Entry<bool> _debugDisableOwnerGate;
@@ -53,7 +55,7 @@ namespace InventoryExpansion.Config
 				"ReduceMovementSpeed",
 				true,
 				"Reduce Movement Speed",
-				"When enabled, player movement speed is reduced to 50% while the backpack is fully open."
+				"Host setting, live. Apply MovementSpeedMultiplier while the backpack is fully open."
 			);
 			_selectBackpackSlotOnOpen = CreateEntry(
 				"SelectBackpackSlotOnOpen",
@@ -88,12 +90,14 @@ namespace InventoryExpansion.Config
 			);
 #endif
 			_additionalSlots.Value = ClampToValidBackpackSize(_additionalSlots.Value);
+			_animationSeconds = CreateEntry("AnimationSeconds", 0.25f, "Backpack Animation Time", "Local display setting. HUD animation duration in seconds, 0-2. Zero opens immediately. Default: 0.25");
 			var hostSettings = new HostSettings(CategoryId);
 			_effectiveEnabled = hostSettings.Register(_enabled, false);
 			_effectiveAdditionalSlots = hostSettings.Register(_additionalSlots, 0, value => value == 0 || (value >= 4 && value <= 24));
-			_effectiveReduceMovementSpeed = hostSettings.Register(_reduceMovementSpeed, false);
-			_effectiveFillBackpackFirst = hostSettings.Register(_fillBackpackFirst, false);
-			_effectiveBlockLargeItemsInBackpack = hostSettings.Register(_blockLargeItemsInBackpack, false);
+			_effectiveReduceMovementSpeed = hostSettings.Register(_reduceMovementSpeed, false, live: true);
+			_effectiveFillBackpackFirst = hostSettings.Register(_fillBackpackFirst, false, live: true);
+			_effectiveBlockLargeItemsInBackpack = hostSettings.Register(_blockLargeItemsInBackpack, false, live: true);
+			_movementSpeedMultiplier = hostSettings.Register(CreateEntry("MovementSpeedMultiplier", 0.5f, "Backpack Movement Multiplier", "Host setting, live. Walking and running speed while the backpack is open, 0-1. Default: 0.5"), 1f, value => value >= 0f && value <= 1f, live: true, legacy: false);
 			hostSettings.EffectiveValuesChanged += () => EffectiveValuesChanged?.Invoke();
 		}
 
@@ -141,6 +145,8 @@ namespace InventoryExpansion.Config
 		}
 
 		internal static bool ReduceMovementSpeed => _effectiveReduceMovementSpeed?.Value ?? _reduceMovementSpeed?.Value ?? true;
+		internal static float MovementSpeedMultiplier => _movementSpeedMultiplier?.Value ?? 1f;
+		internal static float AnimationSeconds => _animationSeconds != null && !float.IsNaN(_animationSeconds.Value) && !float.IsInfinity(_animationSeconds.Value) ? Mathf.Clamp(_animationSeconds.Value, 0f, 2f) : 0.25f;
 
 		internal static bool SelectBackpackSlotOnOpen => _selectBackpackSlotOnOpen?.Value ?? true;
 
