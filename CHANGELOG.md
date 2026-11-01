@@ -4,6 +4,13 @@ All notable changes to InventoryExpansion are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.5.1] - 2026-11-01
+
+### Fixed
+
+- Keep inventory diagnostic patches out of release builds to avoid extra reflection and log writes during pickups and inventory updates.
+- Wait for the game's slot layout during loading instead of reporting a backpack error before slot sizes are ready.
+
 ## [1.5.0] - 2026-10-30
 
 ### Changed
