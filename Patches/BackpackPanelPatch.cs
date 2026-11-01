@@ -34,6 +34,7 @@ namespace InventoryExpansion.Patches
         private static int _savedStandardSlot;
         private static object _animationCoroutine;
         private static string _lastLayoutError;
+        private static bool _waitingForSlotLayout;
 
         internal static bool IsBackpackFullyVisible => _backpackFullyVisible;
         internal static bool IsBackpackOpen => _targetOpen;
@@ -62,9 +63,11 @@ namespace InventoryExpansion.Patches
             try
             {
                 if (_inventoryUi != ui || _backpackPanel == null) Bind(ui);
-                ArrangeSlots();
-                if (_lastLayoutError != null) MelonLogger.Msg("[InventoryExpansion] Native backpack layout recovered.");
-                _lastLayoutError = null;
+                if (ArrangeSlots())
+                {
+                    if (_lastLayoutError != null) MelonLogger.Msg("[InventoryExpansion] Native backpack layout recovered.");
+                    _lastLayoutError = null;
+                }
             }
             catch (Exception error)
             {
@@ -100,12 +103,12 @@ namespace InventoryExpansion.Patches
             _slotsMoved = false;
         }
 
-        private static void ArrangeSlots()
+        private static bool ArrangeSlots()
         {
             var slots = (List<UIPrefab_Inventory.Slot>)InventoryUiPatches.SlotsField.GetValue(_inventoryUi);
             int first = InvenSlotLayout.FirstExtensionSlotKey - 1;
             int count = Math.Min(slots.Count, InventoryUiPatches.LogicalSlotCount) - first;
-            if (count <= 0) return;
+            if (count <= 0) return true;
             int[] rows = BackpackLayout.Rows(count);
             var source = (RectTransform)slots[0].root.transform;
             _firstNativeSlot = source;
@@ -113,7 +116,14 @@ namespace InventoryExpansion.Patches
             // The native layout has already sized the slot root; icon padding does not describe its frame.
             float cellWidth = source.rect.width;
             float cellHeight = source.rect.height;
-            if (cellWidth <= 0 || cellHeight <= 0) throw new InvalidOperationException("Native inventory slot dimensions are not ready.");
+            if (cellWidth <= 0 || cellHeight <= 0)
+            {
+                if (!_waitingForSlotLayout) MelonLogger.Msg("[InventoryExpansion] Waiting for the native inventory slot layout.");
+                _waitingForSlotLayout = true;
+                return false;
+            }
+            if (_waitingForSlotLayout) MelonLogger.Msg("[InventoryExpansion] Native inventory slot layout is ready.");
+            _waitingForSlotLayout = false;
             float gap = (source.parent.GetComponent<HorizontalLayoutGroup>()?.spacing ?? 15f);
             float rowGap = 8f;
             float width = rows.Max() * cellWidth + (rows.Max() - 1) * gap;
@@ -171,6 +181,7 @@ namespace InventoryExpansion.Patches
             _slotsMoved = true;
             ApplyOffset(_targetOpen ? _openOffset : 0);
             ShowContents(_targetOpen);
+            return true;
         }
 
         internal static void FollowNativeHud()
