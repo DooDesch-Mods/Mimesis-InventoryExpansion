@@ -2,6 +2,8 @@
 
 > 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/inventoryexpansion](https://support.doodesch.de/inventoryexpansion).
 
+[![Discord](https://mods.doodesch.de/img/badge.svg)](https://mods.doodesch.de)
+
 
 > Adds extra backpack slots beneath the inventory HUD. Press `C` to raise the hotbar and reveal them, using the game's own slot frames and key hint.
 > Carry more loot without permanently cluttering the standard 4-slot hotbar. Standalone, no MimicAPI required.
@@ -99,3 +101,9 @@ Screenshots and the package icon are captured in MIMESIS.
 Built against MIMESIS 0.4.0 / MelonLoader 0.7.3.
 
 Use InventoryExpansion 1.4.10 or later on both host and clients for counts other than 4, 9 or 16.
+
+## Community
+
+[![DooDesch Mods on Discord](https://mods.doodesch.de/img/card.svg)](https://mods.doodesch.de)
+
+Join the DooDesch Mods Discord: update pings, polls on what comes next, and playtests of new mods.
